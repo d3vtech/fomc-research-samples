@@ -457,7 +457,7 @@ export default function App() {
     
     checkBackend();
   }, []);
-
+  console.log(import.meta.env.VITE_API_URL)
   const handleCancel = useCallback(() => {
     setMessages([]);
     setDisplayData(null);

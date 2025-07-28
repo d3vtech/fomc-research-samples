@@ -37,7 +37,7 @@ backend:
 		--region "us-central1" \
 		--no-allow-unauthenticated \
 		--labels "created-by=adk" \
-		--set-env-vars="GOOGLE_CLOUD_PROJECT=fomc-poc,GOOGLE_CLOUD_PROJECT_NUMBER=920531840392,GOOGLE_CLOUD_LOCATION=us-central1,GOOGLE_CLOUD_BQ_DATASET=fomc-poc.920531840392,GOOGLE_CLOUD_STORAGE_BUCKET=fomc-poc,GOOGLE_GENAI_MODEL=gemini-2.0-flash,GOOGLE_GENAI_USE_VERTEXAI=1, COMMIT_SHA=manual-deploy" \
+		--set-env-vars="GOOGLE_CLOUD_PROJECT=fomc-poc,GOOGLE_CLOUD_PROJECT_NUMBER=<your-project-number>,GOOGLE_CLOUD_LOCATION=us-central1,GOOGLE_CLOUD_BQ_DATASET=<your-dataset-id>,GOOGLE_CLOUD_STORAGE_BUCKET=fomc-poc,GOOGLE_GENAI_MODEL=gemini-2.0-flash,GOOGLE_GENAI_USE_VERTEXAI=1, COMMIT_SHA=manual-deploy" \
 		$(if $(IAP),--iap) \
 		$(if $(PORT),--port=$(PORT))
 

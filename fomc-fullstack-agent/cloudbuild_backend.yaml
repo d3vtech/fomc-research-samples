@@ -1,0 +1,86 @@
+substitutions:
+  _REGION: us-central1
+  _REPO_NAME: fomc-registry
+  _GENAI_MODEL: gemini-2.0-flash
+  _BIG_QUERY_ID: <ID>
+
+
+steps:
+  # Step 0: Create Artifact Registry repo if not exists
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'create-artifact-registry-if-needed'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        REGION="${_REGION}"
+        REPO_NAME="${_REPO_NAME}"
+        PROJECT_ID="${PROJECT_ID}"
+
+
+        echo "Checking Artifact Registry: $$REPO_NAME in $$REGION..."
+
+
+        if ! gcloud artifacts repositories describe "$$REPO_NAME" \
+          --location="$$REGION" --project="$PROJECT_ID" >/dev/null 2>&1; then
+          echo "Creating Artifact Registry: $$REPO_NAME"
+          gcloud artifacts repositories create "$$REPO_NAME" \
+            --repository-format=docker \
+            --location="$$REGION" \
+            --description="Docker repo for FOMC project"
+        else
+          echo "Artifact Registry already exists."
+        fi
+
+
+        echo "IMAGE_REPO=$${REGION}-docker.pkg.dev/${PROJECT_ID}/$${REPO_NAME}" >> /workspace/env_vars
+
+
+  # Step 0.1: Get Project Number
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'get-project-number'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        PROJECT_ID="${PROJECT_ID}"
+        PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+        echo "GOOGLE_CLOUD_PROJECT_NUMBER=${PROJECT_NUMBER}" >> /workspace/env_vars
+
+
+  # Step 1: Build backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/env_vars
+        docker build -f Dockerfile -t "$$IMAGE_REPO/backend-image" .
+ 
+   # Step 2: Push backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-backend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/env_vars
+        docker push "$$IMAGE_REPO/backend-image"
+
+
+  # Step 3: Deploy backend
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-backend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/env_vars
+        gcloud run deploy backend-service \
+          --image "$$IMAGE_REPO/backend-image" \
+          --region "${_REGION}" \
+          --port 8080 \
+          --memory 4Gi \
+          --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_PROJECT_NUMBER=$${GOOGLE_CLOUD_PROJECT_NUMBER},GOOGLE_CLOUD_LOCATION=${_REGION},GOOGLE_CLOUD_BQ_DATASET=${_BIG_QUERY_ID},GOOGLE_CLOUD_STORAGE_BUCKET=${PROJECT_ID},GOOGLE_GENAI_MODEL=${_GENAI_MODEL},GOOGLE_GENAI_USE_VERTEXAI=1,COMMIT_SHA=manual-deploy" \
+          --allow-unauthenticated

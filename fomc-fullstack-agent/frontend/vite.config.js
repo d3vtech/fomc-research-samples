@@ -1,5 +1,5 @@
 import path from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 // https://vitejs.dev/config/
@@ -20,7 +20,9 @@ export default defineConfig({
             // Proxy API requests to the backend server
             "/api": {
                 // target: "http://127.0.0.1:8000", // Default backend address
-                target: "https://backend-service-920531840392.us-central1.run.app",
+                target: "https://backend-service-1-920531840392.us-central1.run.app",
+                // target: env.VITE_BACKEND_URL,
+                // target: import.meta.env.VITE_API_URL,
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/api/, ''),

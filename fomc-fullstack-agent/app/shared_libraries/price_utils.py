@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 MOVE_SIZE_BP = 25
 DATASET_NAME = os.getenv("GOOGLE_CLOUD_BQ_DATASET")
 if not DATASET_NAME:
-    DATASET_NAME = "fomc-poc.920531840392"
+    DATASET_NAME = "<your-dataset-id>"
 TIMESERIES_CODES = os.getenv("GOOGLE_GENAI_FOMC_AGENT_TIMESERIES_CODES")
 if not TIMESERIES_CODES:
     TIMESERIES_CODES = "SFRH5,SFRZ5"

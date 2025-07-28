@@ -20,8 +20,9 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the backend server
       "/api": {
-        // target: "http://127.0.0.1:8000", // Default backend address
-        target: "https://backend-service-920531840392.us-central1.run.app",
+        target: "https://backend-service-1-920531840392.us-central1.run.app", // Default backend address
+        // target: import.meta.env.VITE_API_URL,
+        //const apiUrl =import.meta.env.VITE_API_URL;
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
@@ -40,3 +41,58 @@ export default defineConfig({
     },
   },
 });
+
+
+
+// import path from "node:path";
+// import { defineConfig, loadEnv } from "vite";
+// import react from "@vitejs/plugin-react-swc";
+// import tailwindcss from "@tailwindcss/vite";
+
+// // https://vitejs.dev/config/
+// export default defineConfig(({ mode }) => {
+//   // Load environment variables from .env files
+//   // process.cwd() gives the root directory of the project
+//   const env = loadEnv(mode, process.cwd(), '');
+
+//   // Determine the backend target URL.
+//   // It will use the BACKEND_URL from your environment (e.g., Cloud Run secret).
+//   // If it's not set, it falls back to the local default for development.
+//   const backendTarget = env.BACKEND_URL || "http://127.0.0.1:8000";
+
+//   return {
+//     plugins: [react(), tailwindcss()],
+//     base: "/app/",
+//     resolve: {
+//       alias: {
+//         "@": path.resolve(__dirname, "./src"),
+//       },
+//     },
+//     server: {
+//       // Makes the server accessible on the local network (e.g., for mobile testing)
+//       host: true,
+//       // Should be disabled or limited when deployed in untrusted network environments.
+//       allowedHosts: true,
+//       proxy: {
+//         // Proxy API requests to the backend server
+//         "/api": {
+//           target: backendTarget, // Use the variable for the target
+//           changeOrigin: true,
+//           secure: false,
+//           rewrite: (path) => path.replace(/^\/api/, ''),
+//           configure: (proxy, options) => {
+//             proxy.on('error', (err, req, res) => {
+//               console.log('proxy error', err);
+//             });
+//             proxy.on('proxyReq', (proxyReq, req, res) => {
+//               // console.log(Sending Request to the Target: ${req.method} ${req.url} -> ${backendTarget});
+//             });
+//             proxy.on('proxyRes', (proxyRes, req, res) => {
+//               console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+//             });
+//           },
+//         },
+//       },
+//     },
+//   };
+// });
